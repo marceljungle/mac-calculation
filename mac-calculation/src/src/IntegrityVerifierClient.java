@@ -19,7 +19,6 @@ public class IntegrityVerifierClient {
 	static String[] options = { "HMAC SHA MD5", "HMAC SHA 1", "HMAC SHA 256", "HMAC SHA 384", "HMAC SHA 512" };
 
 	public IntegrityVerifierClient() throws InvalidKeyException, SignatureException, NoSuchAlgorithmException {
-		Date date = new Date();
 
 		// Constructor que abre una conexión Socket para enviar mensaje/MAC al
 
@@ -30,10 +29,12 @@ public class IntegrityVerifierClient {
 			// crea un PrintWriter para enviar mensaje/MAC al servidor
 			PrintWriter output = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
 			String mensaje = JOptionPane.showInputDialog(null, "Introduzca su mensaje:");
+
 			/*
 			 * Devuelve el indice de la opción elegida, y es tratada en la funcion
 			 * calculateHMAC.
 			 */
+
 			int algoritmo = JOptionPane.showOptionDialog(null,
 					"Seleccione el algoritmo a emplear: (Por defecto HMAC SHA 512)", "Click a button",
 					JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
@@ -42,13 +43,24 @@ public class IntegrityVerifierClient {
 			// compartida por servidor/cliente
 			String key = secureCore.importPass();
 
-			System.out.println("[Cliente] El algoritmo usado es: " + algoritmo);
-			System.out.println("[Cliente] Mensaje: " + mensaje);
-			System.out.println("[Cliente] Key: " + key);
-			String mensajeTime = mensaje + date.getTime();
+			/*
+			 * Parte del codigo para evitar ataques de replay
+			 * 
+			 * En el caso del cliente, recogemos el valor en milisegundos actual del tiempo
+			 * y lo concatenamos al mensaje y calculamos su hmac. Al servidor vamos a
+			 * mandarle el mensaje sin la concatenación del tiempo, sin embargo, la hmac si
+			 * va a ser el resultado del mensaje concatenado al tiempo.
+			 * 
+			 * De esta forma, el servidor para poder ver si la hmac coincide, deberá
+			 * calcular la hmac probando los 25 valores anteriores del tiempo, si alguno
+			 * coincide, significa que la operación es válida.
+			 * 
+			 * 
+			 */
+
+			Long time = Long.parseLong(String.valueOf(new Date().getTime()).substring(0, 12));
+			String mensajeTime = mensaje + time;
 			String macdelMensaje = secureCore.calculateHMAC(mensajeTime, key, algoritmo);
-			System.out.println("[Cliente] MAC: " + macdelMensaje);
-			System.out.println("[Cliente] " + mensajeTime);
 			output.println(macdelMensaje);
 			output.println(algoritmo);
 			output.flush();

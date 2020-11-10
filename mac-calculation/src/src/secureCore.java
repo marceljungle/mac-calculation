@@ -22,11 +22,11 @@ public class secureCore {
 	private static final String HMAC_SHA1 = "HmacSHA1";
 	private static final String HMAC_MD5 = "HmacMD5";
 
-	public String configFile(String property) {
+	public String statsFile(String property) {
 		Properties prop = new Properties();
 		try {
 			FileInputStream ip = new FileInputStream(
-					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\config.properties");
+					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\stats.properties");
 			try {
 				prop.load(ip);
 			} catch (IOException e) {

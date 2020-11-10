@@ -10,6 +10,11 @@ import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Date;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import javax.management.openmbean.InvalidKeyException;
 import javax.net.ServerSocketFactory;
@@ -17,6 +22,7 @@ import javax.net.ServerSocketFactory;
 public class IntegrityVerifierServer {
 
 	private ServerSocket serverSocket;
+	private final static Logger LOGGER = Logger.getLogger(IntegrityVerifierClient.class.getName());
 
 	// Constructor
 	public IntegrityVerifierServer() throws Exception {
@@ -27,10 +33,17 @@ public class IntegrityVerifierServer {
 	}
 
 	// ejecución del servidor para escuchar peticiones de los clientes
-	private void runServer() throws InvalidKeyException, SignatureException, NoSuchAlgorithmException {
+	private void runServer()
+			throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, SecurityException, IOException {
+		LOGGER.setLevel(Level.INFO);
+		Handler fileHandler = new FileHandler("logfile.log", true);
+		SimpleFormatter sformatter = new SimpleFormatter();
+		fileHandler.setFormatter(sformatter);
+		LOGGER.addHandler(fileHandler);
 		while (true) {
 			// espera las peticiones del cliente para comprobar mensaje/MAC
 			try {
+				LOGGER.log(Level.INFO, "Servidor a la espera de clientes");
 				System.err.print("Esperando conexiones de clientes...");
 				Socket socket = (Socket) serverSocket.accept();
 				// abre un BufferedReader para leer los datos del cliente
@@ -42,41 +55,47 @@ public class IntegrityVerifierServer {
 				String macdelMensajeEnviado = input.readLine();
 				String key = secureCore.importPass();
 				Integer algo = Integer.parseInt(input.readLine());
-				System.out.println("hasta aqui llego killo");
-				System.out.println("[Server] El algoritmo usado es: " + algo);
-				System.out.println("[Server] Mensaje: " + mensaje);
-				System.out.println("[Server] Key: " + key);
-				/* Parte del codigo para evitar el replay */
+				/*
+				 * Parte del codigo para evitar el replay
+				 * 
+				 * Mediante el valor del tiempo que recogemos en el servidor, entramos en un
+				 * bucle y comprobamos los 25 milisegundos anteriores concatenandolos al mensaje
+				 * y sacando la hmac que le corresponde. Si en alguno de los valores conincide,
+				 * significa que la operación es válida. En caso de que no conincida, podemos
+				 * estar ante un caso de ataque por replay o simplemente la solicitud ha tardado
+				 * demasiado en llegar al servidor.
+				 * 
+				 */
 				String cadena;
 				String macdelMensajeCalculado;
-				long time = new Date().getTime();
+				Long time = Long.parseLong(String.valueOf(new Date().getTime()).substring(0, 12));
 				long newTime;
 				int succeed = 0; // si 0, no ha salido bien
-				for (int i = 0; i < 10; i++) {
+				for (int i = 0; i < 30; i++) {
 					newTime = time - i;
 					cadena = mensaje + newTime;
-
 					macdelMensajeCalculado = secureCore.calculateHMAC(cadena, key, algo);
-					System.out.println("[Cliente] MAC: " + macdelMensajeEnviado);
 					System.out.println(newTime);
-					System.out.println("[Server] MAC: " + macdelMensajeCalculado);
 					// a continuación habría que verificar el MAC
 					if (macdelMensajeEnviado.equals(macdelMensajeCalculado)) {
-						output.println("Mensaje enviado integro ");
+						LOGGER.log(Level.INFO, "Mensaje enviado integro");
+						output.println("Mensaje enviado integro");
 						System.err.println(mensaje);
 						succeed = 1;
 						break;
 					}
 				}
 				if (succeed == 0) {
-					output.println("Mensaje enviado no integro.");
+					LOGGER.log(Level.WARNING, "Mensaje enviado no integro ó hay ataques de replay");
+					output.println("Mensaje enviado no integro ó hay ataques de replay ");
 				}
-
 				/* Parte del codigo para evitar el replay */
 
 				output.close();
 				input.close();
 				socket.close();
+				fileHandler.close();
+				LOGGER.removeHandler(fileHandler);
 			} catch (IOException ioException) {
 				ioException.printStackTrace();
 			}
