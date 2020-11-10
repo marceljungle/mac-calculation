@@ -21,12 +21,11 @@ public class secureCore {
 	private static final String HMAC_SHA256 = "HmacSHA256";
 	private static final String HMAC_SHA1 = "HmacSHA1";
 	private static final String HMAC_MD5 = "HmacMD5";
-
+	
 	public static String importPass() {
 		Properties prop = new Properties();
 		try {
-			FileInputStream ip = new FileInputStream(
-					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\password.properties");
+			FileInputStream ip = new FileInputStream(importConfig().get(0));
 			try {
 				prop.load(ip);
 			} catch (IOException e) {
@@ -39,11 +38,26 @@ public class secureCore {
 		return prop.getProperty("pass");
 	}
 
+	public static List<String> importConfig() {
+		Properties prop = new Properties();
+		try {
+			FileInputStream ip = new FileInputStream("src//config.properties");
+			try {
+				prop.load(ip);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+		}
+		return Arrays.asList(prop.getProperty("dirPass"), prop.getProperty("dirStats"));
+	}
+	
 	public static String calculateHMAC(String data, String key, int algo)
 			throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
 
 		// POR DEFECTO PONEMOS HMAC SHA 512
-
 		SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(), HMAC_SHA512);
 		Mac mac = Mac.getInstance(HMAC_SHA512);
 		if (algo == 0) {
@@ -73,8 +87,7 @@ public class secureCore {
 	public static List<Integer> readStats() {
 		Properties prop = new Properties();
 		try {
-			FileInputStream ip = new FileInputStream(
-					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\stats.properties");
+			FileInputStream ip = new FileInputStream(importConfig().get(1));
 			try {
 				prop.load(ip);
 			} catch (IOException e) {
@@ -91,12 +104,10 @@ public class secureCore {
 	public static void writeStats(String key, String value) throws IOException {
 		Properties prop = new Properties();
 		try {
-			FileInputStream ip = new FileInputStream(
-					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\stats.properties");
+			FileInputStream ip = new FileInputStream(importConfig().get(1));
 			prop.load(ip);
 			prop.setProperty(key, value);
-			prop.store(new FileOutputStream(
-					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\stats.properties"),
+			prop.store(new FileOutputStream(importConfig().get(1)),
 					null);
 		} catch (FileNotFoundException e) {
 			System.out.println(e.getMessage());

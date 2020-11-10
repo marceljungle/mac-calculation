@@ -1,0 +1,20 @@
+nov. 10, 2020 11:22:01 P. M. src.IntegrityVerifierServer runServer
+INFO: Servidor a la espera de clientes
+nov. 10, 2020 11:22:12 P. M. src.IntegrityVerifierServer runServer
+INFO: Mensaje enviado integro
+nov. 10, 2020 11:22:12 P. M. src.IntegrityVerifierServer runServer
+INFO: Cantidad de mensajes integros: 7
+nov. 10, 2020 11:22:12 P. M. src.IntegrityVerifierServer runServer
+INFO: Cantidad total de mensajes: 7
+nov. 10, 2020 11:24:49 P. M. src.IntegrityVerifierServer runServer
+INFO: Servidor a la espera de clientes
+nov. 10, 2020 11:24:59 P. M. src.IntegrityVerifierServer runServer
+INFO: Servidor a la espera de clientes
+nov. 10, 2020 11:25:17 P. M. src.IntegrityVerifierServer runServer
+INFO: Servidor a la espera de clientes
+nov. 10, 2020 11:25:26 P. M. src.IntegrityVerifierServer runServer
+INFO: Mensaje enviado integro
+nov. 10, 2020 11:25:26 P. M. src.IntegrityVerifierServer runServer
+INFO: Cantidad de mensajes integros: 8
+nov. 10, 2020 11:25:26 P. M. src.IntegrityVerifierServer runServer
+INFO: Cantidad total de mensajes: 8
