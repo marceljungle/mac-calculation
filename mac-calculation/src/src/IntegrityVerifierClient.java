@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.Date;
 
 import javax.management.openmbean.InvalidKeyException;
 import javax.net.SocketFactory;
@@ -18,7 +19,10 @@ public class IntegrityVerifierClient {
 	static String[] options = { "HMAC SHA MD5", "HMAC SHA 1", "HMAC SHA 256", "HMAC SHA 384", "HMAC SHA 512" };
 
 	public IntegrityVerifierClient() throws InvalidKeyException, SignatureException, NoSuchAlgorithmException {
+		Date date = new Date();
+
 		// Constructor que abre una conexión Socket para enviar mensaje/MAC al
+
 		// servidor
 		try {
 			SocketFactory socketFactory = (SocketFactory) SocketFactory.getDefault();
@@ -28,7 +32,7 @@ public class IntegrityVerifierClient {
 			String mensaje = JOptionPane.showInputDialog(null, "Introduzca su mensaje:");
 			/*
 			 * Devuelve el indice de la opción elegida, y es tratada en la funcion
-			 * calculateHMAC
+			 * calculateHMAC.
 			 */
 			int algoritmo = JOptionPane.showOptionDialog(null,
 					"Seleccione el algoritmo a emplear: (Por defecto HMAC SHA 512)", "Click a button",
@@ -36,14 +40,16 @@ public class IntegrityVerifierClient {
 			output.println(mensaje); // envio del mensaje al servidor
 			// habría que calcular el correspondiente MAC con la clave
 			// compartida por servidor/cliente
-			String key = RandomString.getAlphaNumericString(100);
-			String macdelMensaje = secureCore.calculateHMAC(mensaje, key, algoritmo);
+			String key = secureCore.importPass();
+
 			System.out.println("[Cliente] El algoritmo usado es: " + algoritmo);
 			System.out.println("[Cliente] Mensaje: " + mensaje);
 			System.out.println("[Cliente] Key: " + key);
+			String mensajeTime = mensaje + date.getTime();
+			String macdelMensaje = secureCore.calculateHMAC(mensajeTime, key, algoritmo);
 			System.out.println("[Cliente] MAC: " + macdelMensaje);
+			System.out.println("[Cliente] " + mensajeTime);
 			output.println(macdelMensaje);
-			output.println(key);
 			output.println(algoritmo);
 			output.flush();
 			// crea un objeto BufferedReader para leer la respuesta del servidor

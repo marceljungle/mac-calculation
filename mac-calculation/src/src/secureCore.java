@@ -39,6 +39,23 @@ public class secureCore {
 		return prop.getProperty(property);
 	}
 
+	public static String importPass() {
+		Properties prop = new Properties();
+		try {
+			FileInputStream ip = new FileInputStream(
+					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\password.properties");
+			try {
+				prop.load(ip);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.out.println(e.getMessage());
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+		}
+		return prop.getProperty("pass");
+	}
+
 	public String sendKey(Socket socket) {
 		String clave = RandomString.getAlphaNumericString(100);
 		try {
