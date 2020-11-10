@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -71,11 +72,10 @@ public class IntegrityVerifierServer {
 				Long time = Long.parseLong(String.valueOf(new Date().getTime()).substring(0, 12));
 				long newTime;
 				int succeed = 0; // si 0, no ha salido bien
-				for (int i = 0; i < 30; i++) {
+				for (int i = 0; i < 50; i++) {
 					newTime = time - i;
 					cadena = mensaje + newTime;
 					macdelMensajeCalculado = secureCore.calculateHMAC(cadena, key, algo);
-					System.out.println(newTime);
 					// a continuación habría que verificar el MAC
 					if (macdelMensajeEnviado.equals(macdelMensajeCalculado)) {
 						LOGGER.log(Level.INFO, "Mensaje enviado integro");
@@ -91,6 +91,25 @@ public class IntegrityVerifierServer {
 				}
 				/* Parte del codigo para evitar el replay */
 
+				/*
+				 * Seguimiento de los mensajes enviados (estadística)
+				 * 
+				 * 
+				 * 
+				 * 
+				 */
+				List<Integer> stats = secureCore.readStats();
+				if (succeed == 1) {
+					secureCore.writeStats("successfull", String.valueOf(stats.get(0) + 1));
+					LOGGER.log(Level.INFO, "Cantidad de mensajes integros: " + String.valueOf(stats.get(0) + 1));
+					LOGGER.log(Level.INFO,
+							"Cantidad total de mensajes: " + String.valueOf(stats.get(0) + 1 + stats.get(1)));
+				} else {
+					secureCore.writeStats("unsuccessfull", String.valueOf(stats.get(1) + 1));
+					LOGGER.log(Level.INFO, "Cantidad de mensajes integros: " + String.valueOf(stats.get(0) + 1));
+					LOGGER.log(Level.INFO,
+							"Cantidad total de mensajes: " + String.valueOf(stats.get(0) + stats.get(1) + 1));
+				}
 				output.close();
 				input.close();
 				socket.close();

@@ -2,13 +2,13 @@ package src;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.Arrays;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Properties;
 
 import javax.crypto.Mac;
@@ -21,23 +21,6 @@ public class secureCore {
 	private static final String HMAC_SHA256 = "HmacSHA256";
 	private static final String HMAC_SHA1 = "HmacSHA1";
 	private static final String HMAC_MD5 = "HmacMD5";
-
-	public String statsFile(String property) {
-		Properties prop = new Properties();
-		try {
-			FileInputStream ip = new FileInputStream(
-					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\stats.properties");
-			try {
-				prop.load(ip);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				System.out.println(e.getMessage());
-			}
-		} catch (FileNotFoundException e) {
-			System.out.println(e.getMessage());
-		}
-		return prop.getProperty(property);
-	}
 
 	public static String importPass() {
 		Properties prop = new Properties();
@@ -54,20 +37,6 @@ public class secureCore {
 			System.out.println(e.getMessage());
 		}
 		return prop.getProperty("pass");
-	}
-
-	public String sendKey(Socket socket) {
-		String clave = RandomString.getAlphaNumericString(100);
-		try {
-			PrintWriter output = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-			output.println(clave); // envio del mensaje al servidor
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.out.println(e.getMessage());
-		}
-
-		return "";
 	}
 
 	public static String calculateHMAC(String data, String key, int algo)
@@ -99,6 +68,39 @@ public class secureCore {
 			System.out.println(e.getMessage());
 		}
 		return toHexString(mac.doFinal(data.getBytes()));
+	}
+
+	public static List<Integer> readStats() {
+		Properties prop = new Properties();
+		try {
+			FileInputStream ip = new FileInputStream(
+					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\stats.properties");
+			try {
+				prop.load(ip);
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+		}
+		return Arrays.asList(Integer.parseInt(prop.getProperty("successfull")),
+				Integer.parseInt(prop.getProperty("unsuccessfull")));
+
+	}
+
+	public static void writeStats(String key, String value) throws IOException {
+		Properties prop = new Properties();
+		try {
+			FileInputStream ip = new FileInputStream(
+					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\stats.properties");
+			prop.load(ip);
+			prop.setProperty(key, value);
+			prop.store(new FileOutputStream(
+					"C:\\Users\\Marcel\\OneDrive - UNIVERSIDAD DE SEVILLA\\GitHub\\mac-calculation\\mac-calculation\\src\\src\\stats.properties"),
+					null);
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	private static String toHexString(byte[] bytes) {

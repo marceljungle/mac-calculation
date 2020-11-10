@@ -12,6 +12,7 @@ import java.util.Date;
 
 import javax.management.openmbean.InvalidKeyException;
 import javax.net.SocketFactory;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 public class IntegrityVerifierClient {
@@ -28,8 +29,10 @@ public class IntegrityVerifierClient {
 			Socket socket = (Socket) socketFactory.createSocket("localhost", 7070);
 			// crea un PrintWriter para enviar mensaje/MAC al servidor
 			PrintWriter output = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-			String mensaje = JOptionPane.showInputDialog(null, "Introduzca su mensaje:");
-
+			String mensaje1 = JOptionPane.showInputDialog(null, "Introduzca la cuenta origen: ");
+			String mensaje2 = JOptionPane.showInputDialog(null, "Introduzca la cuenta destino: ");
+			String mensaje3 = JOptionPane.showInputDialog(null, "Introduzca el importe: ");
+			String mensaje = mensaje1 + " " + mensaje2 + " " + mensaje3;
 			/*
 			 * Devuelve el indice de la opción elegida, y es tratada en la funcion
 			 * calculateHMAC.
@@ -67,7 +70,14 @@ public class IntegrityVerifierClient {
 			// crea un objeto BufferedReader para leer la respuesta del servidor
 			BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			String respuesta = input.readLine(); // lee la respuesta del servidor
-			System.out.println(respuesta); // muestra la respuesta al cliente
+			JFrame f;
+			f = new JFrame();
+			System.out.println(respuesta);
+			if (respuesta.contains("Mensaje enviado integro")) {
+				JOptionPane.showMessageDialog(f, "¡El mensaje ha sido enviado integro!");
+			} else {
+				JOptionPane.showMessageDialog(f, "¡Mensaje enviado no integro ó hay ataques de replay!");
+			}
 			output.close();
 			input.close();
 			socket.close();
